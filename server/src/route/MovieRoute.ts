@@ -13,16 +13,41 @@ MovieRouter.get("/:id", async (req, res) => {
   }
 });
 
-MovieRouter.post("/", (req, res) => {
-  res.send("post");
+MovieRouter.get("/", async (req, res) => {
+  const result = await MovieService.find(req.query);
+  ResponseHelper.sendPageData(result, res);
 });
 
-MovieRouter.put("/", (req, res) => {
-  res.send("put");
+
+MovieRouter.post("/", async (req, res) => {
+  const result = await MovieService.add(req.body);
+  if (Array.isArray(result)) {
+    ResponseHelper.sendError(result, res);
+  } else {
+    ResponseHelper.sendData(result, res);
+  }
 });
 
-MovieRouter.delete("/", (req, res) => {
-  res.send("delete");
+MovieRouter.put("/:id", async (req, res) => {
+  try {
+    const result = await MovieService.edit(req.params.id, req.body);
+    if (result.length > 0) {
+      ResponseHelper.sendError(result, res);
+      return;
+    }
+    ResponseHelper.sendData(true, res);
+  } catch {
+    ResponseHelper.sendError("id错误修改 失败", res);
+  }
+});
+
+MovieRouter.delete("/:id", async (req, res) => {
+  try {
+    const result = await MovieService.delete(req.params.id);
+    ResponseHelper.sendData(true, res);
+  } catch {
+    ResponseHelper.sendError("id错误删除失败", res);
+  }
 });
 
 export { MovieRouter };
